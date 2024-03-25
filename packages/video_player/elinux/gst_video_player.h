@@ -7,17 +7,12 @@
 
 #include <gst/gst.h>
 
-#ifdef USE_EGL_IMAGE_DMABUF
-#include <gst/allocators/gstdmabuf.h>
-#include <gst/gl/egl/egl.h>
-#include <gst/gl/gl.h>
-#include <gst/video/video.h>
-#endif  // USE_EGL_IMAGE_DMABUF
-
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
 #include <string>
+#include <regex>
+#include <vector>
 
 #include "video_player_stream_handler.h"
 
@@ -40,19 +35,20 @@ class GstVideoPlayer {
   int64_t GetDuration();
   int64_t GetCurrentPosition();
   const uint8_t* GetFrameBuffer();
-#ifdef USE_EGL_IMAGE_DMABUF
-  void* GetEGLImage(void* egl_display, void* egl_context);
-#endif  // USE_EGL_IMAGE_DMABUF
   int32_t GetWidth() const { return width_; };
   int32_t GetHeight() const { return height_; };
 
  private:
   struct GstVideoElements {
     GstElement* pipeline;
-    GstElement* playbin;
+    GstElement* video_src;
+    GstElement* camera_caps;
+    GstElement* camera_dec;
     GstElement* video_convert;
+    GstElement* caps_filter;
     GstElement* video_sink;
     GstElement* output;
+
     GstBus* bus;
     GstBuffer* buffer;
   };
@@ -63,33 +59,38 @@ class GstVideoPlayer {
                                           gpointer user_data);
   std::string ParseUri(const std::string& uri);
   bool CreatePipeline();
+  bool CheckPluginAvailability(const std::string & element);
+  void IncreasePluginRank(const std::string & element);
+  void CorrectAspectRatio();
   void DestroyPipeline();
   void Preroll();
   void GetVideoSize(int32_t& width, int32_t& height);
-#ifdef USE_EGL_IMAGE_DMABUF
-  void UnrefEGLImage();
-#endif  // USE_EGL_IMAGE_DMABUF
+  bool IsStreamUri(const std::string &uri) const;
+  bool SetStreamDataFromUrl(const std::string &uri);
+  int NormalizeResolutionValue(const int res_val);
+  void CheckInconsistency(std::string const & uri);
 
   GstVideoElements gst_;
   std::string uri_;
+  std::string aspect_ratio_;
   std::unique_ptr<uint32_t> pixels_;
   int32_t width_;
   int32_t height_;
   double volume_ = 1.0;
   double playback_rate_ = 1.0;
   bool mute_ = false;
+  bool is_stream_ = false;
+  bool is_camera_ = false;
   bool auto_repeat_ = false;
   bool is_completed_ = false;
   std::mutex mutex_event_completed_;
   std::shared_mutex mutex_buffer_;
   std::unique_ptr<VideoPlayerStreamHandler> stream_handler_;
 
-#ifdef USE_EGL_IMAGE_DMABUF
-  GstVideoInfo gst_video_info_;
-  GstEGLImage* gst_egl_image_ = NULL;
-  GstGLContext* gst_gl_ctx_ = NULL;
-  GstGLDisplayEGL* gst_gl_display_egl_ = NULL;
-#endif  // USE_EGL_IMAGE_DMABUF
+  static inline auto const stream_type_regex_ {std::regex("((?:rtp|rtmp|rtcp|rtsp|udp)://.*)", std::regex::icase)};
+  static inline auto const stream_ext_regex_ {std::regex("((?:http|https)://.*(?:.m3u8|.flv))", std::regex::icase)};
+  static inline auto const camera_path_regex_ {std::regex("(/dev/video[0-9])", std::regex::icase)};
+  const std::vector < int > resolution_values_ {720,1080,1280,1920,2160,3840};
 };
 
 #endif  // PACKAGES_VIDEO_PLAYER_VIDEO_PLAYER_ELINUX_GST_VIDEO_PLAYER_H_
