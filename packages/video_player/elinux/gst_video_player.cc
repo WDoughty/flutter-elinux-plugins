@@ -598,6 +598,7 @@ GstBusSyncReply GstVideoPlayer::HandleGstMessage(GstBus* bus,
       break;
     }
     default:
+        std::cerr << "Unhandled message type: " << GST_MESSAGE_TYPE_NAME(message) << std::endl;
       break;
   }
   return GST_BUS_PASS;
