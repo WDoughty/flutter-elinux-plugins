@@ -43,8 +43,6 @@ constexpr char kVideoPlayerApiChannelSetPlaybackSpeedName[] =
     "dev.flutter.pigeon.VideoPlayerApi.setPlaybackSpeed";
 constexpr char kVideoPlayerApiChannelSeekToName[] =
     "dev.flutter.pigeon.VideoPlayerApi.seekTo";
-constexpr char kVideoPlayerApiChannelError[] = 
-    "dev.flutter.pigeon.VideoPlayerApi.verror";
 constexpr char kVideoPlayerVideoEventsChannelName[] =
     "flutter.io/videoPlayer/videoEvents";
 
