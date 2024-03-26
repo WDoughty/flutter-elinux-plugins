@@ -64,7 +64,11 @@ class VideoPlayerStreamHandlerImpl : public VideoPlayerStreamHandler {
 
   void OnNotifyErrorInternal(){
     if(on_notify_error_){
+        std::cout << "OnNotifyErrorInternal" << std::endl;
       on_notify_error_();
+    }
+    else{
+        std::cout << "on_notify_error_ is null" << std::endl;
     }
   }
 
