@@ -62,7 +62,7 @@ class VideoPlayerStreamHandlerImpl : public VideoPlayerStreamHandler {
     }
   }
 
-  void OnNotifyError(){
+  void OnNotifyErrorInternal(){
     if(on_notify_error_){
       on_notify_error_();
     }
