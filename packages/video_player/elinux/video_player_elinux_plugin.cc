@@ -43,7 +43,8 @@ constexpr char kVideoPlayerApiChannelSetPlaybackSpeedName[] =
     "dev.flutter.pigeon.VideoPlayerApi.setPlaybackSpeed";
 constexpr char kVideoPlayerApiChannelSeekToName[] =
     "dev.flutter.pigeon.VideoPlayerApi.seekTo";
-
+constexpr char kVideoPlayerApiChannelError[] = 
+    "dev.flutter.pigeon.VideoPlayerApi.verror";
 constexpr char kVideoPlayerVideoEventsChannelName[] =
     "flutter.io/videoPlayer/videoEvents";
 
@@ -130,6 +131,7 @@ class VideoPlayerPlugin : public flutter::Plugin {
 
   void SendInitializedEventMessage(int64_t texture_id);
   void SendPlayCompletedEventMessage(int64_t texture_id);
+  void SendErrorEventMessage(int64_t texture_id);
   void SendIsPlayingStateUpdate(int64_t texture_id, bool is_playing);
 
   flutter::EncodableValue WrapError(const std::string& message,
@@ -368,6 +370,9 @@ void VideoPlayerPlugin::HandleCreateMethodCall(
         },
         [texture_id, host = this](bool is_playing) {
           host->SendIsPlayingStateUpdate(texture_id, is_playing);
+        },
+        [texture_id, host = this]() {
+          host->SendErrorEventMessage(texture_id);
         });
     instance->player =
         std::make_unique<GstVideoPlayer>(uri, std::move(player_handler));
@@ -600,6 +605,18 @@ void VideoPlayerPlugin::SendPlayCompletedEventMessage(int64_t texture_id) {
       {flutter::EncodableValue("event"), flutter::EncodableValue("completed")}};
   flutter::EncodableValue event(encodables);
   players_[texture_id]->event_sink->Success(event);
+}
+
+void VideoPlayerPlugin::SendErrorEventMessage(int64_t texture_id){
+    if(players_.find(texture_id) == players_.end() ||
+        !players_[texture_id]->event_sink){
+        return;
+    }
+    flutter::EncodableMap encodables = {
+        {flutter::EncodableValue("event"), flutter::EncodableValue("errorDescriptionStateUpdate")},
+        {flutter::EncodableValue("errorDescription"), flutter::EncodableValue("Error occurred while playing video.")}};
+    flutter::EncodableValue event(encodables);
+    players_[texture_id]->event_sink->Success(event);
 }
 
 void VideoPlayerPlugin::SendIsPlayingStateUpdate(int64_t texture_id,

@@ -593,6 +593,8 @@ GstBusSyncReply GstVideoPlayer::HandleGstMessage(GstBus* bus,
       g_printerr("Error details: %s\n", debug);
       g_free(debug);
       g_error_free(error);
+      auto* self = reinterpret_cast<GstVideoPlayer*>(user_data);
+      self->stream_handler_->OnNotifyError();
       break;
     }
     default:

@@ -26,11 +26,14 @@ class VideoPlayerStreamHandler {
   // Notifies update of playing or pausing a video.
   void OnNotifyPlaying(bool is_playing) { OnNotifyPlayingInternal(is_playing); }
 
+  void OnNotifyError() { OnNotifyErrorInternal(); }
+
  protected:
   virtual void OnNotifyInitializedInternal() = 0;
   virtual void OnNotifyFrameDecodedInternal() = 0;
   virtual void OnNotifyCompletedInternal() = 0;
   virtual void OnNotifyPlayingInternal(bool is_playing) = 0;
+  virtual void OnNotifyErrorInternal() = 0;
 };
 
 #endif  // PACKAGES_VIDEO_PLAYER_VIDEO_PLAYER_ELINUX_VIDEO_PLAYER_STREAM_HANDLER_H_
