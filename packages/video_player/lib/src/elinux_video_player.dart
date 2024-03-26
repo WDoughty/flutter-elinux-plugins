@@ -154,6 +154,12 @@ class ELinuxVideoPlayer extends VideoPlayerPlatform {
             eventType: VideoEventType.isPlayingStateUpdate,
             isPlaying: map['isPlaying'] as bool,
           );
+        case 'error':
+          print('We are getting error in video events');
+          throw PlatformException(
+            code: 'VideoError',
+            message: map['errorDescription'] as String,
+          );
         default:
           return VideoEvent(eventType: VideoEventType.unknown);
       }
