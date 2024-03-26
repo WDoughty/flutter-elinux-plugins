@@ -55,8 +55,6 @@ GstVideoPlayer::GstVideoPlayer(
   // which leads to issue with playback picture
   // CorrectAspectRatio();
 
-  Play();
-
   stream_handler_->OnNotifyInitialized();
 }
 
@@ -503,7 +501,7 @@ std::string GstVideoPlayer::ParseUri(const std::string& uri) {
 
   const auto* filename_uri = gst_filename_to_uri(uri.c_str(), NULL);
   if (!filename_uri) {
-    std::cerr << "Faild to open " << uri.c_str() << std::endl;
+    std::cerr << "Failed to open " << uri.c_str() << std::endl;
     return uri;
   }
   std::string result_uri(filename_uri);
@@ -515,20 +513,21 @@ std::string GstVideoPlayer::ParseUri(const std::string& uri) {
 void GstVideoPlayer::GetVideoSize(int32_t& width, int32_t& height) {
   if (!gst_.pipeline || !gst_.video_sink) {
     std::cerr
-        << "Failed to get video size. The pileline hasn't initialized yet.";
+        << "Failed to get video size. The pileline hasn't initialized yet."
+        << std::endl;
     return;
   }
 
   auto* sink_pad = gst_element_get_static_pad(gst_.video_sink, "sink");
   if (!sink_pad) {
-    std::cerr << "Failed to get a pad";
+    std::cerr << "Failed to get a pad" << std::endl;
     return;
   }
 
   auto* caps = gst_pad_get_current_caps(sink_pad);
   auto* structure = gst_caps_get_structure(caps, 0);
   if (!structure) {
-    std::cerr << "Failed to get a structure";
+    std::cerr << "Failed to get a structure" << std::endl;
     return;
   }
 
