@@ -611,7 +611,7 @@ void VideoPlayerPlugin::SendErrorEventMessage(int64_t texture_id){
         return;
     }
     flutter::EncodableMap encodables = {
-        {flutter::EncodableValue("event"), flutter::EncodableValue("errorDescriptionStateUpdate")},
+        {flutter::EncodableValue("event"), flutter::EncodableValue("errorDescription")},
         {flutter::EncodableValue("errorDescription"), flutter::EncodableValue("Error occurred while playing video.")}};
     flutter::EncodableValue event(encodables);
     players_[texture_id]->event_sink->Success(event);
