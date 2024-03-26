@@ -585,6 +585,7 @@ GstBusSyncReply GstVideoPlayer::HandleGstMessage(GstBus* bus,
       break;
     }
     case GST_MESSAGE_ERROR: {
+      auto* self = reinterpret_cast<GstVideoPlayer*>(user_data);
       gchar* debug;
       GError* error;
       gst_message_parse_error(message, &error, &debug);
@@ -593,7 +594,7 @@ GstBusSyncReply GstVideoPlayer::HandleGstMessage(GstBus* bus,
       g_printerr("Error details: %s\n", debug);
       g_free(debug);
       g_error_free(error);
-      stream_handler_->OnNotifyCompleted();
+      self->stream_handler_->OnNotifyCompleted();
       break;
     }
     default:
