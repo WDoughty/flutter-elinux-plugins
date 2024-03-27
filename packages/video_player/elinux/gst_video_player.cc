@@ -597,8 +597,30 @@ GstBusSyncReply GstVideoPlayer::HandleGstMessage(GstBus* bus,
       self->stream_handler_->OnNotifyError();
       break;
     }
+    case GST_MESSAGE_STREAM_STATUS:{
+        GstStreamStatusType type;
+        GstElement *owner;
+        gst_message_parse_stream_status (message, &type, &owner);
+        if (type == GST_STREAM_STATUS_TYPE_CREATE)
+        {
+            std::cout << "Stream status: " << "CREATE" << std::endl;
+        }
+        else if (type == GST_STREAM_STATUS_TYPE_ENTER)
+        {
+            std::cout << "Stream status: " << "ENTER" << std::endl;
+        }
+        else if (type == GST_STREAM_STATUS_TYPE_LEAVE)
+        {
+            std::cout << "Stream status: " << "LEAVE" << std::endl;
+        }
+        else if (type == GST_STREAM_STATUS_TYPE_DESTROY)
+        {
+            std::cout << "Stream status: " << "DESTROY" << std::endl;
+        }
+        break;
+        
+    }
     default:
-        std::cerr << "Unhandled message type: " << GST_MESSAGE_TYPE_NAME(message) << std::endl;
       break;
   }
   return GST_BUS_PASS;
