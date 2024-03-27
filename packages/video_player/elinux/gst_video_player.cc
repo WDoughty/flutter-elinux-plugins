@@ -601,7 +601,7 @@ GstBusSyncReply GstVideoPlayer::HandleGstMessage(GstBus* bus,
         GstStreamStatusType type;
         GstElement *owner;
         gst_message_parse_stream_status (message, &type, &owner);
-        else if (type == GST_STREAM_STATUS_TYPE_LEAVE)
+        if (type == GST_STREAM_STATUS_TYPE_LEAVE)
         {
             std::cout << "Stream status: " << "LEAVE" << std::endl;
             auto* self = reinterpret_cast<GstVideoPlayer*>(user_data);
