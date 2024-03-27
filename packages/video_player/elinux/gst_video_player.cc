@@ -601,17 +601,12 @@ GstBusSyncReply GstVideoPlayer::HandleGstMessage(GstBus* bus,
         GstStreamStatusType type;
         GstElement *owner;
         gst_message_parse_stream_status (message, &type, &owner);
-        if (type == GST_STREAM_STATUS_TYPE_CREATE)
-        {
-            std::cout << "Stream status: " << "CREATE" << std::endl;
-        }
-        else if (type == GST_STREAM_STATUS_TYPE_ENTER)
-        {
-            std::cout << "Stream status: " << "ENTER" << std::endl;
-        }
         else if (type == GST_STREAM_STATUS_TYPE_LEAVE)
         {
             std::cout << "Stream status: " << "LEAVE" << std::endl;
+            auto* self = reinterpret_cast<GstVideoPlayer*>(user_data);
+            self->stream_handler_->OnNotifyError();
+            
         }
         else if (type == GST_STREAM_STATUS_TYPE_DESTROY)
         {
