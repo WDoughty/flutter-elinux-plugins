@@ -525,7 +525,6 @@ void GstVideoPlayer::GetVideoSize(int32_t& width, int32_t& height) {
 // static
 void GstVideoPlayer::OnCapsChanged(GstPad* pad, GParamSpec* pspec,
                                    gpointer user_data) {
-  std::cout << "Caps changed" << std::endl;
   auto* self = reinterpret_cast<GstVideoPlayer*>(user_data);
   auto* caps = gst_pad_get_current_caps(pad);
   if (!caps) {
