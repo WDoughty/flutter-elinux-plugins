@@ -330,7 +330,7 @@ const uint8_t* GstVideoPlayer::GetFrameBuffer() {
 // fakesink"
 bool GstVideoPlayer::CreatePipeline() {
   std::string converter{"imxvideoconvert_g2d"};
-  std::string capsStr{"video/x-raw(memory:DMABuf),format=RGBA"};
+  std::string capsStr{"video/x-raw,format=RGBA"};
   std::string video_src{"playbin3"};
 
   gst_.pipeline = gst_pipeline_new("pipeline");
