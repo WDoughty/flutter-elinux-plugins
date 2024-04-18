@@ -323,6 +323,11 @@ void VideoPlayerPlugin::HandleCreateMethodCall(
           [instance = instance.get()](
               size_t width, size_t height) -> const FlutterDesktopPixelBuffer* {
             try {
+              if (instance->player == nullptr) {
+              std:
+                cerr << "Player is null" << std::endl;
+                return nullptr;
+              }
               instance->buffer->width = instance->player->GetWidth();
               instance->buffer->height = instance->player->GetHeight();
               instance->buffer->buffer = instance->player->GetFrameBuffer();
