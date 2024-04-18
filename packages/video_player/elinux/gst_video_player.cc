@@ -43,8 +43,6 @@ GstVideoPlayer::GstVideoPlayer(
   // Sets internal video size and buffier.
   GetVideoSize(width_, height_);
 
-  pixels_.reset(new uint32_t[width_ * height_]);
-
   // Sometimes live streams doesn't contain aspect ratio
   // which leads to issue with playback picture
   // CorrectAspectRatio();
@@ -546,6 +544,8 @@ void GstVideoPlayer::OnCapsChanged(GstPad* pad, GParamSpec* pspec,
   int height;
   gst_structure_get_int(structure, "width", &width);
   gst_structure_get_int(structure, "height", &height);
+
+  self->pixels_.reset(new uint32_t[width_ * height_]);
 
   if (width != self->width_ || height != self->height_) {
     self->width_ = width;
