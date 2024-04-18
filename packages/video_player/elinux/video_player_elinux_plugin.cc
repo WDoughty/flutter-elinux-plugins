@@ -585,7 +585,7 @@ void VideoPlayerPlugin::SendInitializedEventMessage(int64_t texture_id) {
       !players_[texture_id]->event_sink) {
     return;
   }
-
+  std::cout << "SendInitializedEventMessage" << std::endl;
   auto duration = players_[texture_id]->player->GetDuration();
   auto width = players_[texture_id]->player->GetWidth();
   auto height = players_[texture_id]->player->GetHeight();
