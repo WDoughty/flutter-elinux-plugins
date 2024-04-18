@@ -153,14 +153,14 @@ void GstVideoPlayer::GetVideoSize(int32_t& width, int32_t& height) {
 }
 
 int32_t GstVideoPlayer::GetWidth() {
-  if (is_destroyed_) {
+  if (is_destroyed_ || !initialized_) {
     return 0;
   }
   return width_;
 }
 
 int32_t GstVideoPlayer::GetHeight() {
-  if (is_destroyed_) {
+  if (is_destroyed_ || !initialized_) {
     return 0;
   }
   return height_;
@@ -589,6 +589,8 @@ void GstVideoPlayer::OnCapsChanged(GstPad* pad, GParamSpec* pspec,
               << std::endl;
     self->pixels_.reset(new uint32_t[self->width_ * self->height_]);
   }
+
+  self->initialized_ = true;
 
   gst_caps_unref(caps);
 }
