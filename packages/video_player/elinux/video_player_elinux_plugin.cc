@@ -316,10 +316,16 @@ void VideoPlayerPlugin::HandleCreateMethodCall(
       std::make_unique<flutter::TextureVariant>(flutter::PixelBufferTexture(
           [instance = instance.get()](
               size_t width, size_t height) -> const FlutterDesktopPixelBuffer* {
-            instance->buffer->width = instance->player->GetWidth();
-            instance->buffer->height = instance->player->GetHeight();
-            instance->buffer->buffer = instance->player->GetFrameBuffer();
-            return instance->buffer.get();
+            try {
+              instance->buffer->width = instance->player->GetWidth();
+              instance->buffer->height = instance->player->GetHeight();
+              instance->buffer->buffer = instance->player->GetFrameBuffer();
+              return instance->buffer.get();
+            } catch (const std::exception& e) {
+              std::cerr << "Error in getting pixel buffer: " << e.what()
+                        << std::endl;
+              return nullptr;
+            }
           }));
 #endif  // USE_EGL_IMAGE_DMABUF
   const auto texture_id =
@@ -605,21 +611,18 @@ void VideoPlayerPlugin::SendPlayCompletedEventMessage(int64_t texture_id) {
   players_[texture_id]->event_sink->Success(event);
 }
 
-void VideoPlayerPlugin::SendErrorEventMessage(int64_t texture_id){
-    if(players_.find(texture_id) == players_.end() ||
-        !players_[texture_id]->event_sink){
-        return;
-    }
-    flutter::EncodableMap encodables = {
-        {
-            flutter::EncodableValue("event"), 
-            flutter::EncodableValue(kEncodableMapkeyError)
-        }, {
-            flutter::EncodableValue("errorDescription"),
-            flutter::EncodableValue("Error occurred while playing video")
-        }};
-    flutter::EncodableValue event(encodables);
-    players_[texture_id]->event_sink->Success(event);
+void VideoPlayerPlugin::SendErrorEventMessage(int64_t texture_id) {
+  if (players_.find(texture_id) == players_.end() ||
+      !players_[texture_id]->event_sink) {
+    return;
+  }
+  flutter::EncodableMap encodables = {
+      {flutter::EncodableValue("event"),
+       flutter::EncodableValue(kEncodableMapkeyError)},
+      {flutter::EncodableValue("errorDescription"),
+       flutter::EncodableValue("Error occurred while playing video")}};
+  flutter::EncodableValue event(encodables);
+  players_[texture_id]->event_sink->Success(event);
 }
 
 void VideoPlayerPlugin::SendIsPlayingStateUpdate(int64_t texture_id,
