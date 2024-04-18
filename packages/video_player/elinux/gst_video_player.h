@@ -35,8 +35,8 @@ class GstVideoPlayer {
   int64_t GetDuration();
   int64_t GetCurrentPosition();
   const uint8_t* GetFrameBuffer();
-  int32_t GetWidth() const { return width_; };
-  int32_t GetHeight() const { return height_; };
+  int32_t GetWidth();
+  int32_t GetHeight();
 
  private:
   struct GstVideoElements {
@@ -85,6 +85,7 @@ class GstVideoPlayer {
   bool is_camera_ = false;
   bool auto_repeat_ = false;
   bool is_completed_ = false;
+  bool is_destroyed_ = false;
   std::mutex mutex_event_completed_;
   std::shared_mutex mutex_buffer_;
   std::unique_ptr<VideoPlayerStreamHandler> stream_handler_;

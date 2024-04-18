@@ -52,6 +52,7 @@ GstVideoPlayer::GstVideoPlayer(
 
 GstVideoPlayer::~GstVideoPlayer() {
   std::cout << "Deref Video Player" << std::endl;
+  is_destroyed_ = true;
   //   Stop();
   DestroyPipeline();
 }
@@ -149,6 +150,20 @@ void GstVideoPlayer::GetVideoSize(int32_t& width, int32_t& height) {
 
     gst_object_unref(sink_pad);
   }
+}
+
+int32_t GstVideoPlayer::GetWidth() {
+  if (is_destroyed_) {
+    return 0;
+  }
+  return width_;
+}
+
+int32_t GstVideoPlayer::GetHeight() {
+  if (is_destroyed_) {
+    return 0;
+  }
+  return height_;
 }
 
 bool GstVideoPlayer::SetPlaybackRate(double rate) {
