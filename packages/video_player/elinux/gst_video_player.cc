@@ -330,7 +330,7 @@ const uint8_t* GstVideoPlayer::GetFrameBuffer() {
 // fakesink"
 bool GstVideoPlayer::CreatePipeline() {
   std::string converter{"imxvideoconvert_g2d"};
-  std::string capsStr{"video/x-raw(memory:DMABuf), format=RGBA"};
+  std::string capsStr{"video/x-raw(memory:DMABuf),format=RGBA"};
   std::string video_src{"playbin3"};
 
   gst_.pipeline = gst_pipeline_new("pipeline");
@@ -395,6 +395,10 @@ bool GstVideoPlayer::CreatePipeline() {
 
   // Adds caps to the converter to convert the color format to RGBA.
   auto* caps = gst_caps_from_string(capsStr.c_str());
+  if (!caps) {
+    std::cerr << "Failed to create caps" << std::endl;
+    return false;
+  }
   g_object_set(G_OBJECT(gst_.caps_filter), "caps", caps, NULL);
 
   // Sets properties to playbin.
