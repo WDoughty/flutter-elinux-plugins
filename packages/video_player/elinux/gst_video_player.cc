@@ -525,6 +525,11 @@ void GstVideoPlayer::GetVideoSize(int32_t& width, int32_t& height) {
   }
 
   auto* caps = gst_pad_get_current_caps(sink_pad);
+  if (!caps) {
+    std::cerr << "Failed to get caps" << std::endl;
+    return;
+  }
+  
   auto* structure = gst_caps_get_structure(caps, 0);
   if (!structure) {
     std::cerr << "Failed to get a structure" << std::endl;
@@ -533,6 +538,9 @@ void GstVideoPlayer::GetVideoSize(int32_t& width, int32_t& height) {
 
   gst_structure_get_int(structure, "width", &width);
   gst_structure_get_int(structure, "height", &height);
+
+  gst_caps_unref(caps);
+
 }
 
 // static
