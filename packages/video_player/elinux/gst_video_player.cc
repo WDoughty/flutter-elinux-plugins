@@ -51,6 +51,7 @@ GstVideoPlayer::GstVideoPlayer(
 }
 
 GstVideoPlayer::~GstVideoPlayer() {
+  std::cout << "Deref Video Player" << std::endl;
   Stop();
   DestroyPipeline();
 }
