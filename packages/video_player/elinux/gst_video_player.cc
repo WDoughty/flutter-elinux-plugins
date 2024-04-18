@@ -591,15 +591,8 @@ GstBusSyncReply GstVideoPlayer::HandleGstMessage(GstBus* bus,
       g_printerr("ERROR from element %s: %s\n", GST_OBJECT_NAME(message->src),
                  error->message);
       g_printerr("Error details: %s\n", debug);
-      try{
-        g_free(debug);
-        g_error_free(error);
-      }
-      catch(...)
-      {
-        std::cerr << "Error in freeing memory" << std::endl;
-      }
-      
+      g_free(debug);
+      g_error_free(error);
       auto* self = reinterpret_cast<GstVideoPlayer*>(user_data);
       self->stream_handler_->OnNotifyError();
       break;
