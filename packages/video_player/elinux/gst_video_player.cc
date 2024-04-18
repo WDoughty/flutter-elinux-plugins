@@ -547,7 +547,10 @@ void GstVideoPlayer::OnCapsChanged(GstPad* pad, GParamSpec* pspec,
     std::cout << "Caps changed: width = " << width << ", height = " << height
               << std::endl;
     self->pixels_.reset(new uint32_t[self->width_ * self->height_]);
+  }
+  if (!self->initialized_) {
     self->stream_handler_->OnNotifyInitialized();
+    self->initialized_ = true;
   }
 
   gst_caps_unref(caps);

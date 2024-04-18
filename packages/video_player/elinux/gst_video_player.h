@@ -77,6 +77,7 @@ class GstVideoPlayer {
   std::unique_ptr<uint32_t> pixels_;
   int32_t width_;
   int32_t height_;
+  bool initialized_ = false;
   double volume_ = 1.0;
   double playback_rate_ = 1.0;
   bool mute_ = false;
