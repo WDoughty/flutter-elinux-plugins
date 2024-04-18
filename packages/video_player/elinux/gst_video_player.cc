@@ -128,6 +128,29 @@ bool GstVideoPlayer::SetVolume(double volume) {
   return true;
 }
 
+void GstVideoPlayer::GetVideoSize(int32_t& width, int32_t& height) {
+  if (!gst_.pipeline || !gst_.video_sink) {
+    std::cerr
+        << "Failed to get video size. The pileline hasn't initialized yet."
+        << std::endl;
+    return;
+  }
+
+  auto* sink_pad = gst_element_get_static_pad(gst_.video_sink, "sink");
+  if (!sink_pad) {
+    std::cerr << "Failed to get a pad" << std::endl;
+    return;
+  }
+
+  auto* caps = gst_pad_get_current_caps(sink_pad);
+  if (!caps) {
+    // Set a callback when the sink_pad caps get set
+    g_signal_connect(sink_pad, "notify::caps", G_CALLBACK(OnCapsChanged), this);
+
+    gst_object_unref(sink_pad);
+  }
+}
+
 bool GstVideoPlayer::SetPlaybackRate(double rate) {
   if (is_stream_ || is_camera_) return false;
 
