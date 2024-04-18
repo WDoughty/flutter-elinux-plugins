@@ -515,7 +515,6 @@ void GstVideoPlayer::GetVideoSize(int32_t& width, int32_t& height) {
 
   auto* caps = gst_pad_get_current_caps(sink_pad);
   if (!caps) {
-    std::cerr << "Failed to get caps" << std::endl;
     // Set a callback when the sink_pad caps get set
     g_signal_connect(sink_pad, "notify::caps", G_CALLBACK(OnCapsChanged), this);
 
