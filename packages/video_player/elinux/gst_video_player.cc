@@ -22,8 +22,6 @@ GstVideoPlayer::GstVideoPlayer(
   if (!regex_match(uri, GstVideoPlayer::camera_path_regex_)) {
     uri_ = ParseUri(uri);
     is_stream_ = IsStreamUri(uri_);
-    width_ = 640;
-    height_ = 360;
 
   } else {
     // camera handling
