@@ -46,8 +46,6 @@ GstVideoPlayer::GstVideoPlayer(
   // Sometimes live streams doesn't contain aspect ratio
   // which leads to issue with playback picture
   // CorrectAspectRatio();
-
-  stream_handler_->OnNotifyInitialized();
 }
 
 GstVideoPlayer::~GstVideoPlayer() {
@@ -549,6 +547,7 @@ void GstVideoPlayer::OnCapsChanged(GstPad* pad, GParamSpec* pspec,
     std::cout << "Caps changed: width = " << width << ", height = " << height
               << std::endl;
     self->pixels_.reset(new uint32_t[self->width_ * self->height_]);
+    self->stream_handler_->OnNotifyInitialized();
   }
 
   gst_caps_unref(caps);
