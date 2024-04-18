@@ -43,6 +43,8 @@ GstVideoPlayer::GstVideoPlayer(
   // Sets internal video size and buffier.
   GetVideoSize(width_, height_);
 
+  stream_handler_->OnNotifyInitialized();
+
   // Sometimes live streams doesn't contain aspect ratio
   // which leads to issue with playback picture
   // CorrectAspectRatio();
@@ -328,7 +330,7 @@ const uint8_t* GstVideoPlayer::GetFrameBuffer() {
 // fakesink"
 bool GstVideoPlayer::CreatePipeline() {
   std::string converter{"imxvideoconvert_g2d"};
-  std::string capsStr{"video/x-raw,format=RGBA"};
+  std::string capsStr{"video/x-raw(memory:DMABuf), format=RGBA"};
   std::string video_src{"playbin3"};
 
   gst_.pipeline = gst_pipeline_new("pipeline");
@@ -547,10 +549,6 @@ void GstVideoPlayer::OnCapsChanged(GstPad* pad, GParamSpec* pspec,
     std::cout << "Caps changed: width = " << width << ", height = " << height
               << std::endl;
     self->pixels_.reset(new uint32_t[self->width_ * self->height_]);
-  }
-  if (!self->initialized_) {
-    self->stream_handler_->OnNotifyInitialized();
-    self->initialized_ = true;
   }
 
   gst_caps_unref(caps);
