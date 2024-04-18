@@ -410,8 +410,6 @@ bool GstVideoPlayer::CreatePipeline() {
   // Sets properties to fakesink to get the callback of a decoded frame.
   g_object_set(G_OBJECT(gst_.video_sink), "sync", FALSE, "qos", FALSE, NULL);
   g_object_set(G_OBJECT(gst_.video_sink), "signal-handoffs", TRUE, NULL);
-  g_signal_connect(G_OBJECT(gst_.video_sink), "handoff",
-                   G_CALLBACK(HandoffHandler), this);
 
   if (video_src == "playbin3")
     gst_bin_add_many(GST_BIN(gst_.output), gst_.video_convert, gst_.caps_filter,
@@ -476,6 +474,10 @@ void GstVideoPlayer::Preroll() {
 
 void GstVideoPlayer::DestroyPipeline() {
   if (gst_.video_sink) {
+    g_signal_handlers_disconnect_by_func(
+        G_OBJECT(gst_.video_sink), reinterpret_cast<gpointer>(HandoffHandler),
+        this);
+
     auto* sink_pad = gst_element_get_static_pad(gst_.video_sink, "sink");
     if (!sink_pad) {
       std::cerr << "Failed to get a pad" << std::endl;
