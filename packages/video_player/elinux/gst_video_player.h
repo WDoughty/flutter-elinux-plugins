@@ -9,9 +9,9 @@
 
 #include <memory>
 #include <mutex>
+#include <regex>
 #include <shared_mutex>
 #include <string>
-#include <regex>
 #include <vector>
 
 #include "video_player_stream_handler.h"
@@ -59,16 +59,17 @@ class GstVideoPlayer {
                                           gpointer user_data);
   std::string ParseUri(const std::string& uri);
   bool CreatePipeline();
-  bool CheckPluginAvailability(const std::string & element);
-  void IncreasePluginRank(const std::string & element);
+  bool CheckPluginAvailability(const std::string& element);
+  void IncreasePluginRank(const std::string& element);
   void CorrectAspectRatio();
   void DestroyPipeline();
   void Preroll();
   void GetVideoSize(int32_t& width, int32_t& height);
-  bool IsStreamUri(const std::string &uri) const;
-  bool SetStreamDataFromUrl(const std::string &uri);
+  bool IsStreamUri(const std::string& uri) const;
+  bool SetStreamDataFromUrl(const std::string& uri);
   int NormalizeResolutionValue(const int res_val);
-  void CheckInconsistency(std::string const & uri);
+  void CheckInconsistency(std::string const& uri);
+  static void OnCapsChanged(GstPad* pad, GParamSpec* pspec, gpointer user_data);
 
   GstVideoElements gst_;
   std::string uri_;
@@ -87,10 +88,13 @@ class GstVideoPlayer {
   std::shared_mutex mutex_buffer_;
   std::unique_ptr<VideoPlayerStreamHandler> stream_handler_;
 
-  static inline auto const stream_type_regex_ {std::regex("((?:rtp|rtmp|rtcp|rtsp|udp)://.*)", std::regex::icase)};
-  static inline auto const stream_ext_regex_ {std::regex("((?:http|https)://.*(?:.m3u8|.flv))", std::regex::icase)};
-  static inline auto const camera_path_regex_ {std::regex("(/dev/video[0-9])", std::regex::icase)};
-  const std::vector < int > resolution_values_ {720,1080,1280,1920,2160,3840};
+  static inline auto const stream_type_regex_{
+      std::regex("((?:rtp|rtmp|rtcp|rtsp|udp)://.*)", std::regex::icase)};
+  static inline auto const stream_ext_regex_{
+      std::regex("((?:http|https)://.*(?:.m3u8|.flv))", std::regex::icase)};
+  static inline auto const camera_path_regex_{
+      std::regex("(/dev/video[0-9])", std::regex::icase)};
+  const std::vector<int> resolution_values_{720, 1080, 1280, 1920, 2160, 3840};
 };
 
 #endif  // PACKAGES_VIDEO_PLAYER_VIDEO_PLAYER_ELINUX_GST_VIDEO_PLAYER_H_
