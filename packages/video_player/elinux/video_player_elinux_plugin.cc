@@ -304,11 +304,17 @@ void VideoPlayerPlugin::HandleCreateMethodCall(
           [instance = instance.get()](
               size_t width, size_t height, void* egl_display,
               void* egl_context) -> const FlutterDesktopEGLImage* {
-            instance->egl_image->width = instance->player->GetWidth();
-            instance->egl_image->height = instance->player->GetHeight();
-            instance->egl_image->egl_image =
-                instance->player->GetEGLImage(egl_display, egl_context);
-            return instance->egl_image.get();
+            try {
+              instance->egl_image->width = instance->player->GetWidth();
+              instance->egl_image->height = instance->player->GetHeight();
+              instance->egl_image->egl_image =
+                  instance->player->GetEGLImage(egl_display, egl_context);
+              return instance->egl_image.get();
+            } catch (const std::exception& e) {
+              std::cerr << "Error in getting pixel buffer: " << e.what()
+                        << std::endl;
+              return nullptr;
+            }
           }));
 #else
   instance->buffer = std::make_unique<FlutterDesktopPixelBuffer>();
