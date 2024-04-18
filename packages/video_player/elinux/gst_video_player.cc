@@ -52,7 +52,7 @@ GstVideoPlayer::GstVideoPlayer(
 
 GstVideoPlayer::~GstVideoPlayer() {
   std::cout << "Deref Video Player" << std::endl;
-  Stop();
+  //   Stop();
   DestroyPipeline();
 }
 
@@ -448,6 +448,7 @@ void GstVideoPlayer::Preroll() {
 }
 
 void GstVideoPlayer::DestroyPipeline() {
+  UnlinkOnCapsChanged();
   if (gst_.video_sink) {
     g_object_set(G_OBJECT(gst_.video_sink), "signal-handoffs", FALSE, NULL);
   }
@@ -504,11 +505,11 @@ std::string GstVideoPlayer::ParseUri(const std::string& uri) {
   return result_uri;
 }
 
-void GstVideoPlayer::GetVideoSize(int32_t& width, int32_t& height) {
+void GstVideoPlayer::UnlinkOnCapsChanged() {
   if (!gst_.pipeline || !gst_.video_sink) {
-    std::cerr
-        << "Failed to get video size. The pileline hasn't initialized yet."
-        << std::endl;
+    std::cerr << "Failed to unlink OnCapsChanged. The pipeline hasn't "
+                 "initialized yet."
+              << std::endl;
     return;
   }
 
@@ -518,13 +519,10 @@ void GstVideoPlayer::GetVideoSize(int32_t& width, int32_t& height) {
     return;
   }
 
-  auto* caps = gst_pad_get_current_caps(sink_pad);
-  if (!caps) {
-    // Set a callback when the sink_pad caps get set
-    g_signal_connect(sink_pad, "notify::caps", G_CALLBACK(OnCapsChanged), this);
+  g_signal_handlers_disconnect_by_func(
+      sink_pad, reinterpret_cast<gpointer>(OnCapsChanged), this);
 
-    gst_object_unref(sink_pad);
-  }
+  gst_object_unref(sink_pad);
 }
 
 // static
