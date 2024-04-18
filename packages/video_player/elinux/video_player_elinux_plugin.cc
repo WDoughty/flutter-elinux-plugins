@@ -324,7 +324,6 @@ void VideoPlayerPlugin::HandleCreateMethodCall(
               size_t width, size_t height) -> const FlutterDesktopPixelBuffer* {
             try {
               if (instance->player == nullptr) {
-                std::cerr << "Player is null" << std::endl;
                 return nullptr;
               }
               instance->buffer->width = instance->player->GetWidth();
@@ -595,7 +594,6 @@ void VideoPlayerPlugin::SendInitializedEventMessage(int64_t texture_id) {
       !players_[texture_id]->event_sink) {
     return;
   }
-  std::cout << "SendInitializedEventMessage" << std::endl;
   auto duration = players_[texture_id]->player->GetDuration();
   auto width = players_[texture_id]->player->GetWidth();
   auto height = players_[texture_id]->player->GetHeight();

@@ -51,7 +51,6 @@ GstVideoPlayer::GstVideoPlayer(
 }
 
 GstVideoPlayer::~GstVideoPlayer() {
-  std::cout << "Deref Video Player" << std::endl;
   is_destroyed_ = true;
   //   Stop();
   DestroyPipeline();
