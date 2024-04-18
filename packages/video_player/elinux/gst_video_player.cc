@@ -4,10 +4,9 @@
 
 #include "gst_video_player.h"
 
-
+#include <algorithm>
 #include <iostream>
 #include <unordered_map>
-#include <algorithm>
 
 GstVideoPlayer::GstVideoPlayer(
     const std::string& uri, std::unique_ptr<VideoPlayerStreamHandler> handler)
@@ -20,17 +19,14 @@ GstVideoPlayer::GstVideoPlayer(
   gst_.bus = nullptr;
   gst_.buffer = nullptr;
 
-  if (!regex_match(uri, GstVideoPlayer::camera_path_regex_))
-  {
+  if (!regex_match(uri, GstVideoPlayer::camera_path_regex_)) {
     uri_ = ParseUri(uri);
     is_stream_ = IsStreamUri(uri_);
     width_ = 640;
     height_ = 360;
 
-  }
-  else
-  {
-    //camera handling
+  } else {
+    // camera handling
     uri_ = uri;
     is_camera_ = true;
     width_ = 1920;
@@ -63,32 +59,31 @@ GstVideoPlayer::~GstVideoPlayer() {
   DestroyPipeline();
 }
 
-bool GstVideoPlayer::IsStreamUri(const std::string &uri) const
-{
-  return regex_match(uri, GstVideoPlayer::stream_type_regex_)
-        || regex_match(uri, GstVideoPlayer::stream_ext_regex_);
+bool GstVideoPlayer::IsStreamUri(const std::string& uri) const {
+  return regex_match(uri, GstVideoPlayer::stream_type_regex_) ||
+         regex_match(uri, GstVideoPlayer::stream_ext_regex_);
 }
 
-bool GstVideoPlayer::CheckPluginAvailability(const std::string & element)
-{
-  return gst_element_factory_find (element.c_str()) ? true : false;
+bool GstVideoPlayer::CheckPluginAvailability(const std::string& element) {
+  return gst_element_factory_find(element.c_str()) ? true : false;
 }
 
-// Code to increase Gst plugin rank, should be used to force using particular plugin
-void GstVideoPlayer::IncreasePluginRank(const std::string & element)
-{
-  GstRegistry *registry = NULL;
-  GstElementFactory *factory = NULL;
+// Code to increase Gst plugin rank, should be used to force using particular
+// plugin
+void GstVideoPlayer::IncreasePluginRank(const std::string& element) {
+  GstRegistry* registry = NULL;
+  GstElementFactory* factory = NULL;
 
-  registry = gst_registry_get ();
+  registry = gst_registry_get();
   if (!registry) return;
 
-  factory = gst_element_factory_find (element.c_str());
-  if (!factory) printf("%s","factory fail");
+  factory = gst_element_factory_find(element.c_str());
+  if (!factory) printf("%s", "factory fail");
 
-  gst_plugin_feature_set_rank (GST_PLUGIN_FEATURE (factory), GST_RANK_PRIMARY + 100);
+  gst_plugin_feature_set_rank(GST_PLUGIN_FEATURE(factory),
+                              GST_RANK_PRIMARY + 100);
 
-  gst_registry_add_feature (registry, GST_PLUGIN_FEATURE (factory));
+  gst_registry_add_feature(registry, GST_PLUGIN_FEATURE(factory));
 }
 
 // static
@@ -103,7 +98,8 @@ bool GstVideoPlayer::Play() {
     std::cerr << "Failed to change the state to PLAYING" << std::endl;
     return false;
   }
-  GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(gst_.pipeline), GST_DEBUG_GRAPH_SHOW_ALL, "pipeline");
+  GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(gst_.pipeline), GST_DEBUG_GRAPH_SHOW_ALL,
+                            "pipeline");
   return true;
 }
 
@@ -136,8 +132,7 @@ bool GstVideoPlayer::SetVolume(double volume) {
 }
 
 bool GstVideoPlayer::SetPlaybackRate(double rate) {
-  if (is_stream_ || is_camera_)
-    return false;
+  if (is_stream_ || is_camera_) return false;
 
   if (!gst_.video_src) {
     return false;
@@ -170,8 +165,7 @@ bool GstVideoPlayer::SetPlaybackRate(double rate) {
 }
 
 bool GstVideoPlayer::SetSeek(int64_t position) {
-  if (is_stream_ || is_camera_)
-    return false;
+  if (is_stream_ || is_camera_) return false;
 
   auto nanosecond = position * 1000 * 1000;
   if (!gst_element_seek(
@@ -186,8 +180,7 @@ bool GstVideoPlayer::SetSeek(int64_t position) {
 }
 
 int64_t GstVideoPlayer::GetDuration() {
-  if (is_stream_ || is_camera_)
-    return 0;
+  if (is_stream_ || is_camera_) return 0;
 
   GstFormat fmt = GST_FORMAT_TIME;
   int64_t duration_msec;
@@ -202,8 +195,7 @@ int64_t GstVideoPlayer::GetDuration() {
 int64_t GstVideoPlayer::GetCurrentPosition() {
   gint64 position = 0;
 
-  if (is_stream_ || is_camera_)
-    return position;
+  if (is_stream_ || is_camera_) return position;
 
   // Sometimes we get an error when playing streaming videos.
   if (!gst_element_query_position(gst_.pipeline, GST_FORMAT_TIME, &position)) {
@@ -232,98 +224,98 @@ int64_t GstVideoPlayer::GetCurrentPosition() {
   return position / GST_MSECOND;
 }
 
-bool GstVideoPlayer::SetStreamDataFromUrl(const std::string &uri)
-{
+bool GstVideoPlayer::SetStreamDataFromUrl(const std::string& uri) {
   std::size_t param_start_pos = uri.find_last_of('?');
-  if (param_start_pos == std::string::npos)
-  {
+  if (param_start_pos == std::string::npos) {
     std::cerr << "Url doesn't contain any param" << std::endl;
     return false;
   }
 
-  std::size_t param_end_pos = uri.find('&',++param_start_pos);
-  std::unordered_map < std::string, std::string > params;
-  while ( param_end_pos != std::string::npos )
-  {
-    param_end_pos = uri.find('&',param_start_pos);
-    std::string p = uri.substr(param_start_pos, param_end_pos-param_start_pos);
+  std::size_t param_end_pos = uri.find('&', ++param_start_pos);
+  std::unordered_map<std::string, std::string> params;
+  while (param_end_pos != std::string::npos) {
+    param_end_pos = uri.find('&', param_start_pos);
+    std::string p =
+        uri.substr(param_start_pos, param_end_pos - param_start_pos);
     std::size_t p_pos = p.find('=');
-    params.insert(std::make_pair<std::string, std::string>
-                    (p.substr(0,p_pos), p.substr(p_pos+1)));
+    params.insert(std::make_pair<std::string, std::string>(
+        p.substr(0, p_pos), p.substr(p_pos + 1)));
     param_start_pos = param_end_pos + 1;
   }
 
-  if ( params.find("w") != params.end() )
+  if (params.find("w") != params.end())
     width_ = NormalizeResolutionValue(std::stoi(params["w"]));
   else
     std::cerr << "WARNING: width wasn't provided!" << std::endl;
 
-  if ( params.find("h") != params.end() )
+  if (params.find("h") != params.end())
     height_ = NormalizeResolutionValue(std::stoi(params["h"]));
   else
     std::cerr << "WARNING: height wasn't provided!" << std::endl;
 
-  if ( params.find("o") != params.end() )
-  {
+  if (params.find("o") != params.end()) {
     if (params["o"] == "l")
       aspect_ratio_ = "16/9";
     else
       aspect_ratio_ = "9/16";
-  }
-  else
+  } else
     std::cerr << "WARNING: orientation wasn't provided!" << std::endl;
 
   return true;
 }
 
 int GstVideoPlayer::NormalizeResolutionValue(const int res_val) {
-  return *(std::lower_bound(resolution_values_.begin(), resolution_values_.end(), res_val));
+  return *(std::lower_bound(resolution_values_.begin(),
+                            resolution_values_.end(), res_val));
 }
 
 void GstVideoPlayer::CorrectAspectRatio() {
-  auto* pad = gst_element_get_static_pad (gst_.caps_filter, "src");
+  auto* pad = gst_element_get_static_pad(gst_.caps_filter, "src");
   auto* caps = gst_pad_get_current_caps(pad);
   auto* structure = gst_caps_get_structure(caps, 0);
 
   if (!structure) {
-    std::cerr << "Failed to get a structure to correct aspect ratio" << std::endl;
+    std::cerr << "Failed to get a structure to correct aspect ratio"
+              << std::endl;
     std::cerr << "Setting portrait aspect ratio" << std::endl;
 
-    auto* caps_portrait = gst_caps_from_string("video/x-raw(memory:DMABuf), format=RGBA, pixel-aspect-ratio=9/16");
-    g_object_set (G_OBJECT (gst_.caps_filter), "caps", caps_portrait, NULL);
+    auto* caps_portrait = gst_caps_from_string(
+        "video/x-raw(memory:DMABuf), format=RGBA, pixel-aspect-ratio=9/16");
+    g_object_set(G_OBJECT(gst_.caps_filter), "caps", caps_portrait, NULL);
 
     return;
   }
 
   gint aspr_n, aspr_d;
-  if (!gst_structure_get_fraction(structure, "pixel-aspect-ratio", &aspr_n, &aspr_d))
-  {
+  if (!gst_structure_get_fraction(structure, "pixel-aspect-ratio", &aspr_n,
+                                  &aspr_d)) {
     std::cerr << "Failed to get aspect-ratio fraction" << std::endl;
     return;
   }
 
-  if ( aspr_n != 1 && aspr_d != 1)
-  {
-    gst_caps_unref (caps);
-    gst_object_unref (pad);
+  if (aspr_n != 1 && aspr_d != 1) {
+    gst_caps_unref(caps);
+    gst_object_unref(pad);
     return;
   }
 
-  if ( width_ > height_ ) {
-    aspr_n = 16; aspr_d = 9;
+  if (width_ > height_) {
+    aspr_n = 16;
+    aspr_d = 9;
   } else {
-    aspr_n = 9; aspr_d = 16;
+    aspr_n = 9;
+    aspr_d = 16;
   }
 
-  GValue aspr {0};
+  GValue aspr{0};
   memset(&aspr, 0, sizeof(GValue));
   g_value_init(&aspr, GST_TYPE_FRACTION);
   gst_value_set_fraction(&aspr, aspr_n, aspr_d);
 
-  gst_structure_set_value (structure, "pixel-aspect-ratio", &aspr);
+  gst_structure_set_value(structure, "pixel-aspect-ratio", &aspr);
 
-  gst_caps_unref (caps);
-  gst_object_unref (pad);
+  gst_caps_unref(caps);
+  gst_object_unref(pad);
 }
 
 const uint8_t* GstVideoPlayer::GetFrameBuffer() {
@@ -341,9 +333,9 @@ const uint8_t* GstVideoPlayer::GetFrameBuffer() {
 // $ playbin uri=<file> video-sink="videoconvert ! video/x-raw,format=RGBA !
 // fakesink"
 bool GstVideoPlayer::CreatePipeline() {
-  std::string converter {"imxvideoconvert_g2d"};
-  std::string capsStr {"video/x-raw,format=RGBA"};
-  std::string video_src {"playbin3"};
+  std::string converter{"imxvideoconvert_g2d"};
+  std::string capsStr{"video/x-raw,format=RGBA"};
+  std::string video_src{"playbin3"};
 
   gst_.pipeline = gst_pipeline_new("pipeline");
   if (!gst_.pipeline) {
@@ -357,7 +349,8 @@ bool GstVideoPlayer::CreatePipeline() {
     return false;
   }
 
-  gst_.video_convert = gst_element_factory_make(converter.c_str(), "videoconvert");
+  gst_.video_convert =
+      gst_element_factory_make(converter.c_str(), "videoconvert");
   if (!gst_.video_convert) {
     std::cerr << "Failed to create a videoconvert" << std::endl;
     return false;
@@ -375,8 +368,7 @@ bool GstVideoPlayer::CreatePipeline() {
     return false;
   }
 
-  if (video_src == "playbin3")
-  {
+  if (video_src == "playbin3") {
     gst_.output = gst_bin_new("output");
     if (!gst_.output) {
       std::cerr << "Failed to create an output" << std::endl;
@@ -398,20 +390,21 @@ bool GstVideoPlayer::CreatePipeline() {
                    G_CALLBACK(HandoffHandler), this);
 
   if (video_src == "playbin3")
-    gst_bin_add_many(GST_BIN(gst_.output), gst_.video_convert, gst_.caps_filter, gst_.video_sink,
-                    NULL);
+    gst_bin_add_many(GST_BIN(gst_.output), gst_.video_convert, gst_.caps_filter,
+                     gst_.video_sink, NULL);
   else
-    gst_bin_add_many(GST_BIN(gst_.pipeline), gst_.video_src, gst_.camera_caps, gst_.camera_dec, gst_.video_convert, gst_.caps_filter, gst_.video_sink,
-                    NULL);
+    gst_bin_add_many(GST_BIN(gst_.pipeline), gst_.video_src, gst_.camera_caps,
+                     gst_.camera_dec, gst_.video_convert, gst_.caps_filter,
+                     gst_.video_sink, NULL);
 
   // Adds caps to the converter to convert the color format to RGBA.
   auto* caps = gst_caps_from_string(capsStr.c_str());
-  g_object_set (G_OBJECT (gst_.caps_filter), "caps", caps, NULL);
+  g_object_set(G_OBJECT(gst_.caps_filter), "caps", caps, NULL);
 
   // Sets properties to playbin.
-  if (video_src == "playbin3")
-  {
-    gst_element_link_many(gst_.video_convert, gst_.caps_filter, gst_.video_sink, NULL);
+  if (video_src == "playbin3") {
+    gst_element_link_many(gst_.video_convert, gst_.caps_filter, gst_.video_sink,
+                          NULL);
 
     auto* sinkpad = gst_element_get_static_pad(gst_.video_convert, "sink");
     auto* ghost_sinkpad = gst_ghost_pad_new("sink", sinkpad);
@@ -421,10 +414,10 @@ bool GstVideoPlayer::CreatePipeline() {
     g_object_set(gst_.video_src, "uri", uri_.c_str(), NULL);
     g_object_set(gst_.video_src, "video-sink", gst_.output, NULL);
     gst_bin_add_many(GST_BIN(gst_.pipeline), gst_.video_src, NULL);
-  }
-  else
-  {
-    gst_element_link_many(gst_.video_src, gst_.camera_caps, gst_.camera_dec, gst_.video_convert, gst_.caps_filter, gst_.video_sink, NULL);
+  } else {
+    gst_element_link_many(gst_.video_src, gst_.camera_caps, gst_.camera_dec,
+                          gst_.video_convert, gst_.caps_filter, gst_.video_sink,
+                          NULL);
 
     g_object_set(gst_.video_src, "device", uri_.c_str(), NULL);
   }
@@ -527,20 +520,42 @@ void GstVideoPlayer::GetVideoSize(int32_t& width, int32_t& height) {
   auto* caps = gst_pad_get_current_caps(sink_pad);
   if (!caps) {
     std::cerr << "Failed to get caps" << std::endl;
+    // Set a callback when the sink_pad caps get set
+    g_signal_connect(sink_pad, "notify::caps", G_CALLBACK(OnCapsChanged), this);
+
+    gst_object_unref(sink_pad);
+  }
+}
+
+// static
+void GstVideoPlayer::OnCapsChanged(GstPad* pad, GParamSpec* pspec,
+                                   gpointer user_data) {
+  auto* self = reinterpret_cast<GstVideoPlayer*>(user_data);
+  auto* caps = gst_pad_get_current_caps(pad);
+  if (!caps) {
+    std::cerr << "Failed to get caps" << std::endl;
     return;
   }
-  
+
   auto* structure = gst_caps_get_structure(caps, 0);
   if (!structure) {
     std::cerr << "Failed to get a structure" << std::endl;
     return;
   }
 
+  int width;
+  int height;
   gst_structure_get_int(structure, "width", &width);
   gst_structure_get_int(structure, "height", &height);
 
-  gst_caps_unref(caps);
+  if (width != self->width_ || height != self->height_) {
+    self->width_ = width;
+    self->height_ = height;
+    std::cout << "Caps changed: width = " << width << ", height = " << height
+              << std::endl;
+  }
 
+  gst_caps_unref(caps);
 }
 
 // static
@@ -605,22 +620,19 @@ GstBusSyncReply GstVideoPlayer::HandleGstMessage(GstBus* bus,
       self->stream_handler_->OnNotifyError();
       break;
     }
-    case GST_MESSAGE_STREAM_STATUS:{
-        GstStreamStatusType type;
-        GstElement *owner;
-        gst_message_parse_stream_status (message, &type, &owner);
-        if (type == GST_STREAM_STATUS_TYPE_LEAVE)
-        {
-            auto* self = reinterpret_cast<GstVideoPlayer*>(user_data);
-            self->stream_handler_->OnNotifyError();
-            
-        }
-        else if (type == GST_STREAM_STATUS_TYPE_DESTROY)
-        {
-            std::cout << "Stream status: " << "DESTROY" << std::endl;
-        }
-        break;
-        
+    case GST_MESSAGE_STREAM_STATUS: {
+      GstStreamStatusType type;
+      GstElement* owner;
+      gst_message_parse_stream_status(message, &type, &owner);
+      if (type == GST_STREAM_STATUS_TYPE_LEAVE) {
+        auto* self = reinterpret_cast<GstVideoPlayer*>(user_data);
+        self->stream_handler_->OnNotifyError();
+
+      } else if (type == GST_STREAM_STATUS_TYPE_DESTROY) {
+        std::cout << "Stream status: "
+                  << "DESTROY" << std::endl;
+      }
+      break;
     }
     default:
       break;
