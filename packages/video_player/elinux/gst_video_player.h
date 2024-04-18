@@ -35,8 +35,18 @@ class GstVideoPlayer {
   int64_t GetDuration();
   int64_t GetCurrentPosition();
   const uint8_t* GetFrameBuffer();
-  int32_t GetWidth() const { return width_; };
-  int32_t GetHeight() const { return height_; };
+  int32_t GetWidth() const {
+    if (width_ == NULL) {
+      return 0;
+    }
+    return width_;
+  };
+  int32_t GetHeight() const {
+    if (height_ == NULL) {
+      return 0;
+    }
+    return height_;
+  };
 
  private:
   struct GstVideoElements {
