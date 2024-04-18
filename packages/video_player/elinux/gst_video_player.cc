@@ -448,8 +448,18 @@ void GstVideoPlayer::Preroll() {
 }
 
 void GstVideoPlayer::DestroyPipeline() {
-  UnlinkOnCapsChanged();
   if (gst_.video_sink) {
+    auto* sink_pad = gst_element_get_static_pad(gst_.video_sink, "sink");
+    if (!sink_pad) {
+      std::cerr << "Failed to get a pad" << std::endl;
+      return;
+    }
+
+    g_signal_handlers_disconnect_by_func(
+        sink_pad, reinterpret_cast<gpointer>(OnCapsChanged), this);
+
+    gst_object_unref(sink_pad);
+
     g_object_set(G_OBJECT(gst_.video_sink), "signal-handoffs", FALSE, NULL);
   }
 
@@ -503,26 +513,6 @@ std::string GstVideoPlayer::ParseUri(const std::string& uri) {
   delete filename_uri;
 
   return result_uri;
-}
-
-void GstVideoPlayer::UnlinkOnCapsChanged() {
-  if (!gst_.pipeline || !gst_.video_sink) {
-    std::cerr << "Failed to unlink OnCapsChanged. The pipeline hasn't "
-                 "initialized yet."
-              << std::endl;
-    return;
-  }
-
-  auto* sink_pad = gst_element_get_static_pad(gst_.video_sink, "sink");
-  if (!sink_pad) {
-    std::cerr << "Failed to get a pad" << std::endl;
-    return;
-  }
-
-  g_signal_handlers_disconnect_by_func(
-      sink_pad, reinterpret_cast<gpointer>(OnCapsChanged), this);
-
-  gst_object_unref(sink_pad);
 }
 
 // static
