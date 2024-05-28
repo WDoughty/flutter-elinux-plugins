@@ -48,6 +48,7 @@ class GstVideoPlayer {
     GstElement* caps_filter;
     GstElement* video_sink;
     GstElement* output;
+    GstElement* fpssink;
 
     GstBus* bus;
     GstBuffer* buffer;

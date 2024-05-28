@@ -18,6 +18,7 @@ GstVideoPlayer::GstVideoPlayer(
   gst_.output = nullptr;
   gst_.bus = nullptr;
   gst_.buffer = nullptr;
+  gst_.fpssink = nullptr;
 
   if (!regex_match(uri, GstVideoPlayer::camera_path_regex_)) {
     uri_ = ParseUri(uri);
@@ -406,6 +407,12 @@ bool GstVideoPlayer::CreatePipeline() {
     return false;
   }
 
+  gst_.fpssink = gst_element_factory_make("fpsdisplaysink", "fpssink");
+  if (!gst_.fpssink) {
+    std::cerr << "Failed to create a fpssink" << std::endl;
+    return false;
+  }
+
   if (video_src == "playbin3") {
     gst_.output = gst_bin_new("output");
     if (!gst_.output) {
@@ -421,6 +428,10 @@ bool GstVideoPlayer::CreatePipeline() {
   }
   gst_bus_set_sync_handler(gst_.bus, HandleGstMessage, this, NULL);
 
+  g_object_set(G_OBJECT(gst_.fpssink), "text-overlay", TRUE, NULL);
+  g_object_set(G_OJECT(gst_.fpssink), "sync", FALSE, NULL);
+  g_object_set(G_OBJECT(gst_.fpssink), "video-sink", gst_.video_sink, NULL);
+
   // Sets properties to fakesink to get the callback of a decoded frame.
   g_object_set(G_OBJECT(gst_.video_sink), "sync", FALSE, "qos", FALSE, NULL);
   g_object_set(G_OBJECT(gst_.video_sink), "signal-handoffs", TRUE, NULL);
@@ -429,11 +440,11 @@ bool GstVideoPlayer::CreatePipeline() {
 
   if (video_src == "playbin3")
     gst_bin_add_many(GST_BIN(gst_.output), gst_.video_convert, gst_.caps_filter,
-                     gst_.video_sink, NULL);
+                     gst_.fpssink, NULL);
   else
     gst_bin_add_many(GST_BIN(gst_.pipeline), gst_.video_src, gst_.camera_caps,
                      gst_.camera_dec, gst_.video_convert, gst_.caps_filter,
-                     gst_.video_sink, NULL);
+                     gst_.fpssink, NULL);
 
   // Adds caps to the converter to convert the color format to RGBA.
   auto* caps = gst_caps_from_string(capsStr.c_str());
@@ -445,7 +456,7 @@ bool GstVideoPlayer::CreatePipeline() {
 
   // Sets properties to playbin.
   if (video_src == "playbin3") {
-    gst_element_link_many(gst_.video_convert, gst_.caps_filter, gst_.video_sink,
+    gst_element_link_many(gst_.video_convert, gst_.caps_filter, gst_.fpssink,
                           NULL);
 
     auto* sinkpad = gst_element_get_static_pad(gst_.video_convert, "sink");
@@ -537,6 +548,10 @@ void GstVideoPlayer::DestroyPipeline() {
 
   if (gst_.video_sink) {
     gst_.video_sink = nullptr;
+  }
+
+  if (gst_.fpssink) {
+    gst_.fpssink = nullptr;
   }
 
   if (gst_.video_convert) {
@@ -665,8 +680,7 @@ GstBusSyncReply GstVideoPlayer::HandleGstMessage(GstBus* bus,
         self->stream_handler_->OnNotifyError();
 
       } else if (type == GST_STREAM_STATUS_TYPE_DESTROY) {
-        std::cout << "Stream status: "
-                  << "DESTROY" << std::endl;
+        std::cout << "Stream status: " << "DESTROY" << std::endl;
       }
       break;
     }
