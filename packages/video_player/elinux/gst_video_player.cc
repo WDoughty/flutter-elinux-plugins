@@ -429,7 +429,7 @@ bool GstVideoPlayer::CreatePipeline() {
   gst_bus_set_sync_handler(gst_.bus, HandleGstMessage, this, NULL);
 
   g_object_set(G_OBJECT(gst_.fpssink), "text-overlay", TRUE, NULL);
-  g_object_set(G_OJECT(gst_.fpssink), "sync", FALSE, NULL);
+  g_object_set(G_OBJECT(gst_.fpssink), "sync", FALSE, NULL);
   g_object_set(G_OBJECT(gst_.fpssink), "video-sink", gst_.video_sink, NULL);
 
   // Sets properties to fakesink to get the callback of a decoded frame.
