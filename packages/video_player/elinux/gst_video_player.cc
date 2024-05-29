@@ -102,7 +102,7 @@ void GstVideoPlayer::ToggleFpsTextDisplay() {
     g_object_set(G_OBJECT(gst_.fpssink), "text-overlay", !text_overlay, NULL);
 
   } catch (const std::exception& e) {
-    std::cerr << e.what() << '\n';
+    std::cerr << "Some error dude: " << e.what() << '\n';
     g_object_set(G_OBJECT(gst_.fpssink), "text-overlay", TRUE, NULL);
   }
 }
