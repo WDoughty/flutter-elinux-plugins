@@ -81,9 +81,10 @@ class ELinuxVideoPlayer extends VideoPlayerPlatform {
     return _api.play(TextureMessage(textureId: textureId));
   }
 
+  /// Toggles fpsdisplaysink text overlay on and off. Does not pause
   @override
   Future<void> pause(int textureId) {
-    return _api.pause(TextureMessage(textureId: textureId));
+    return _api.toggleFps(ToggleFpsMessage(textureId: textureId));
   }
 
   @override
@@ -117,6 +118,11 @@ class ELinuxVideoPlayer extends VideoPlayerPlatform {
     final PositionMessage response =
         await _api.position(TextureMessage(textureId: textureId));
     return Duration(milliseconds: response.position);
+  }
+
+  /// Toggles fpsdisplaysink text-overlay on and off
+  Future<void> toggleFps(int textureId) {
+    return _api.toggleFps(ToggleFpsMessage(textureId: textureId));
   }
 
   @override

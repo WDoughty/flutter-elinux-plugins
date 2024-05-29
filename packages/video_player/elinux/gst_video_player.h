@@ -29,6 +29,7 @@ class GstVideoPlayer {
   bool Pause();
   bool Stop();
   bool SetVolume(double volume);
+  void ToggleFpsTextDisplay();
   bool SetPlaybackRate(double rate);
   void SetAutoRepeat(bool auto_repeat) { auto_repeat_ = auto_repeat; };
   bool SetSeek(int64_t position);
@@ -48,6 +49,7 @@ class GstVideoPlayer {
     GstElement* caps_filter;
     GstElement* video_sink;
     GstElement* output;
+    GstElement* fpssink;
 
     GstBus* bus;
     GstBuffer* buffer;
