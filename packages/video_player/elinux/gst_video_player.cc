@@ -94,7 +94,17 @@ void GstVideoPlayer::ToggleFpsTextDisplay() {
 
   gboolean text_overlay;
   g_object_get(G_OBJECT(gst_.fpssink), "text-overlay", &text_overlay, NULL);
-  g_object_set(G_OBJECT(gst_.fpssink), "text-overlay", !text_overlay, NULL);
+  if (text_overlay)
+    std::cout << "FPS text overlay is enabled" << std::endl;
+  else
+    std::cout << "FPS text overlay is disabled" << std::endl;
+  try {
+    g_object_set(G_OBJECT(gst_.fpssink), "text-overlay", !text_overlay, NULL);
+
+  } catch (const std::exception& e) {
+    std::cerr << e.what() << '\n';
+    g_object_set(G_OBJECT(gst_.fpssink), "text-overlay", TRUE, NULL);
+  }
 }
 
 // static
