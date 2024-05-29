@@ -29,6 +29,7 @@ class GstVideoPlayer {
   bool Pause();
   bool Stop();
   bool SetVolume(double volume);
+  void ToggleFpsTextDisplay();
   bool SetPlaybackRate(double rate);
   void SetAutoRepeat(bool auto_repeat) { auto_repeat_ = auto_repeat; };
   bool SetSeek(int64_t position);
@@ -71,7 +72,6 @@ class GstVideoPlayer {
   int NormalizeResolutionValue(const int res_val);
   void CheckInconsistency(std::string const& uri);
   static void OnCapsChanged(GstPad* pad, GParamSpec* pspec, gpointer user_data);
-  void ToggleFpsTextDisplay();
 
   GstVideoElements gst_;
   std::string uri_;
