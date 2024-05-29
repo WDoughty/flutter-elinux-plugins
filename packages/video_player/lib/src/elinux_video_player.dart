@@ -119,6 +119,11 @@ class ELinuxVideoPlayer extends VideoPlayerPlatform {
     return Duration(milliseconds: response.position);
   }
 
+  /// Toggles fpsdisplaysink text-overlay on and off
+  Future<void> toggleFps(int textureId) {
+    return _api.toggleFps(ToggleFpsMessage(textureId: textureId));
+  }
+
   @override
   Stream<VideoEvent> videoEventsFor(int textureId) {
     return _eventChannelFor(textureId)

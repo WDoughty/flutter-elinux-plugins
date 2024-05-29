@@ -45,6 +45,8 @@ constexpr char kVideoPlayerApiChannelSeekToName[] =
     "dev.flutter.pigeon.VideoPlayerApi.seekTo";
 constexpr char kVideoPlayerVideoEventsChannelName[] =
     "flutter.io/videoPlayer/videoEvents";
+constexpr char kVideoPlayerApiChannelToggleFps[] =
+    "dev.flutter.pigeon.VideoPlayerApi.toggleFps";
 
 constexpr char kEncodableMapkeyResult[] = "result";
 constexpr char kEncodableMapkeyError[] = "error";
@@ -124,6 +126,9 @@ class VideoPlayerPlugin : public flutter::Plugin {
       const flutter::EncodableValue& message,
       flutter::MessageReply<flutter::EncodableValue> reply);
   void HandlePositionMethodCall(
+      const flutter::EncodableValue& message,
+      flutter::MessageReply<flutter::EncodableValue> reply);
+  void HandleToggleFpsMethodCall(
       const flutter::EncodableValue& message,
       flutter::MessageReply<flutter::EncodableValue> reply);
 
@@ -267,6 +272,17 @@ void VideoPlayerPlugin::RegisterWithRegistrar(
     channel->SetMessageHandler(
         [plugin_pointer = plugin.get()](const auto& message, auto reply) {
           plugin_pointer->HandlePositionMethodCall(message, reply);
+        });
+  }
+
+  {
+    auto channel = std::make_unique<
+        flutter::BassicMessageChannel<flutter::EncodableValue>>(
+        registrar->messenger(), kVideoPlayerApiChannelToggleFps,
+        &flutter::StandardMessageCodec::GetInstance());
+    channel->SetMessageHandler(
+        [plugin_pointer = plugin.get()](const auto& message, auto reply) {
+          plugin_pointer->HandleToggleFpsMethodCall(message, reply);
         });
   }
 
@@ -580,6 +596,27 @@ void VideoPlayerPlugin::HandleSeekToMethodCall(
     players_[texture_id]->player->SetSeek(parameter.GetPosition());
     result.emplace(flutter::EncodableValue(kEncodableMapkeyResult),
                    flutter::EncodableValue());
+  } else {
+    auto error_message = "Couldn't find the player with texture id: " +
+                         std::to_string(texture_id);
+    result.emplace(flutter::EncodableValue(kEncodableMapkeyError),
+                   flutter::EncodableValue(WrapError(error_message)));
+  }
+  reply(flutter::EncodableValue(result));
+}
+
+void VideoPlayerPlugin::HandleToggleFpsMethodCall(
+    const flutter::EncodableValue& message,
+    flutter::MessageReply<flutter::EncodableValue> reply) {
+  auto parameter = TextureMessage::FromMap(message);
+  const auto texture_id = parameter.GetTextureId();
+  flutter::EncodableMap result;
+
+  if (players_.find(texture_id) != players_.end()) {
+    players_[texture_id]->player->ToggleFpsTextDisplay();
+    result.emplace(flutter::EncodableValue(kEncodableMapkeyResult),
+                   flutter::EncodableValue());
+
   } else {
     auto error_message = "Couldn't find the player with texture id: " +
                          std::to_string(texture_id);

@@ -71,6 +71,7 @@ class GstVideoPlayer {
   int NormalizeResolutionValue(const int res_val);
   void CheckInconsistency(std::string const& uri);
   static void OnCapsChanged(GstPad* pad, GParamSpec* pspec, gpointer user_data);
+  void ToggleFpsTextDisplay();
 
   GstVideoElements gst_;
   std::string uri_;

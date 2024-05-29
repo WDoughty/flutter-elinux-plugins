@@ -170,6 +170,27 @@ class PositionMessage {
   }
 }
 
+class ToggleFpsMessage {
+  ToggleFpsMessage({
+    required this.textureId,
+  });
+
+  int textureId;
+
+  Object encode() {
+    final Map<Object?, Object?> pigeonMap = <Object?, Object?>{};
+    pigeonMap['textureId'] = textureId;
+    return pigeonMap;
+  }
+
+  static ToggleFpsMessage decode(Object message) {
+    final Map<Object?, Object?> pigeonMap = message as Map<Object?, Object?>;
+    return ToggleFpsMessage(
+      textureId: pigeonMap['textureId'] as int,
+    );
+  }
+}
+
 class MixWithOthersMessage {
   MixWithOthersMessage({
     required this.mixWithOthers,
@@ -191,7 +212,7 @@ class MixWithOthersMessage {
   }
 }
 
-/// [VideoPlayerApi] in 
+/// [VideoPlayerApi] in
 class ELinuxVideoPlayerApi {
   Future<void> initialize() async {
     const BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
@@ -312,6 +333,29 @@ class ELinuxVideoPlayerApi {
         message: error['message'] as String?,
         details: error['details'],
       );
+    } else {
+      // noop
+    }
+  }
+
+  Future<void> toggleFps(ToggleFpsMessage arg) async {
+    final Object encoded = arg.encode();
+    const BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.VideoPlayerApi.toggleFps', StandardMessageCodec());
+    final Map<Object?, Object?>? replyMap =
+        await channel.send(encoded) as Map<Object?, Object?>?;
+    if (replyMap == null) {
+      throw PlatformException(
+          code: 'channel-error',
+          message: 'Unable to establish connection on channel.',
+          details: null);
+    } else if (replyMap['error'] != null) {
+      final Map<Object?, Object?> error =
+          replyMap['error'] as Map<Object?, Object?>;
+      throw PlatformException(
+          code: error['code'] as String,
+          message: error['message'] as String?,
+          details: error['details']);
     } else {
       // noop
     }

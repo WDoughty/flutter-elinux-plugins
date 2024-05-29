@@ -87,6 +87,16 @@ void GstVideoPlayer::IncreasePluginRank(const std::string& element) {
 // static
 void GstVideoPlayer::GstLibraryLoad() { gst_init(NULL, NULL); }
 
+void GstVideoPlayer::ToggleFpsTextDisplay() {
+  if (!gst_.fpssink) {
+    return;
+  }
+
+  gboolean text_overlay;
+  g_object_get(G_OBJECT(gst_.fpssink), "text-overlay", &text_overlay, NULL);
+  g_object_set(G_OBJECT(gst_.fpssink), "text-overlay", !text_overlay, NULL);
+}
+
 // static
 void GstVideoPlayer::GstLibraryUnload() { gst_deinit(); }
 
