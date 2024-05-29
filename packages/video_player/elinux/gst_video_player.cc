@@ -94,17 +94,8 @@ void GstVideoPlayer::ToggleFpsTextDisplay() {
 
   gboolean text_overlay;
   g_object_get(G_OBJECT(gst_.fpssink), "text-overlay", &text_overlay, NULL);
-  if (text_overlay)
-    std::cout << "FPS text overlay is enabled" << std::endl;
-  else
-    std::cout << "FPS text overlay is disabled" << std::endl;
-  try {
-    g_object_set(G_OBJECT(gst_.fpssink), "text-overlay", !text_overlay, NULL);
 
-  } catch (...) {
-    std::cerr << "Some error dude" << '\n';
-    g_object_set(G_OBJECT(gst_.fpssink), "text-overlay", TRUE, NULL);
-  }
+  g_object_set(G_OBJECT(gst_.fpssink), "text-overlay", !text_overlay, NULL);
 }
 
 // static
@@ -118,7 +109,13 @@ bool GstVideoPlayer::Play() {
   }
   GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(gst_.pipeline), GST_DEBUG_GRAPH_SHOW_ALL,
                             "pipeline");
+
+  if (gst_.fpssink) {
+    std::cout << "Turning off text overlay" << std::endl;
+    g_object_set(G_OBJECT(gst_.fpssink), "text-overlay", FALSE, NULL);
+  }
   return true;
+  s
 }
 
 bool GstVideoPlayer::Pause() {
@@ -448,7 +445,7 @@ bool GstVideoPlayer::CreatePipeline() {
   }
   gst_bus_set_sync_handler(gst_.bus, HandleGstMessage, this, NULL);
 
-  g_object_set(G_OBJECT(gst_.fpssink), "text-overlay", FALSE, NULL);
+  g_object_set(G_OBJECT(gst_.fpssink), "text-overlay", TRUE, NULL);
   g_object_set(G_OBJECT(gst_.fpssink), "sync", FALSE, NULL);
   g_object_set(G_OBJECT(gst_.fpssink), "video-sink", gst_.video_sink, NULL);
 
