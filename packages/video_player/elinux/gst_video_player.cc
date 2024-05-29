@@ -115,7 +115,6 @@ bool GstVideoPlayer::Play() {
     g_object_set(G_OBJECT(gst_.fpssink), "text-overlay", FALSE, NULL);
   }
   return true;
-  s
 }
 
 bool GstVideoPlayer::Pause() {
