@@ -276,10 +276,10 @@ void VideoPlayerPlugin::RegisterWithRegistrar(
   }
 
   {
-    auto channel = std::make_unique<
-        flutter::BassicMessageChannel<flutter::EncodableValue>>(
-        registrar->messenger(), kVideoPlayerApiChannelToggleFps,
-        &flutter::StandardMessageCodec::GetInstance());
+    auto channel =
+        std::make_unique<flutter::BasicMessageChannel<flutter::EncodableValue>>(
+            registrar->messenger(), kVideoPlayerApiChannelToggleFps,
+            &flutter::StandardMessageCodec::GetInstance());
     channel->SetMessageHandler(
         [plugin_pointer = plugin.get()](const auto& message, auto reply) {
           plugin_pointer->HandleToggleFpsMethodCall(message, reply);
