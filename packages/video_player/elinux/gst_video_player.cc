@@ -624,7 +624,7 @@ void GstVideoPlayer::OnCapsChanged(GstPad* pad, GParamSpec* pspec,
   }
 
   self->initialized_ = true;
-  gst_caps_unref(caps);
+  //   gst_caps_unref(caps);
 }
 
 // static
