@@ -516,6 +516,8 @@ void GstVideoPlayer::Preroll() {
 }
 
 void GstVideoPlayer::DestroyPipeline() {
+  std::cout << "Destroying pipeline" << std::endl;
+
   if (gst_.video_sink) {
     g_signal_handlers_disconnect_by_func(
         G_OBJECT(gst_.video_sink), reinterpret_cast<gpointer>(HandoffHandler),
@@ -618,11 +620,6 @@ void GstVideoPlayer::OnCapsChanged(GstPad* pad, GParamSpec* pspec,
     std::cout << "Caps changed: width = " << width << ", height = " << height
               << std::endl;
     self->pixels_.reset(new uint32_t[self->width_ * self->height_]);
-  } else {
-    std::cout << "Caps changed: width = " << width << ", height = " << height
-              << std::endl;
-    self->initialized_ = true;
-    return;
   }
 
   self->initialized_ = true;
