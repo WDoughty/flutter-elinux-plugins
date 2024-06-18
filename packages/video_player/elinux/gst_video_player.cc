@@ -596,6 +596,7 @@ std::string GstVideoPlayer::ParseUri(const std::string& uri) {
 // static
 void GstVideoPlayer::OnCapsChanged(GstPad* pad, GParamSpec* pspec,
                                    gpointer user_data) {
+  std::cout << "Caps changed callback" << std::endl;
   auto* self = reinterpret_cast<GstVideoPlayer*>(user_data);
   auto* caps = gst_pad_get_current_caps(pad);
   if (!caps) {
