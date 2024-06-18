@@ -623,6 +623,7 @@ void GstVideoPlayer::OnCapsChanged(GstPad* pad, GParamSpec* pspec,
   else if (width == self->width_ && height == self->height_) {
     std::cout << "Caps didnt change: width = " << width
               << ", height = " << height << std::endl;
+    self->stream_handler_->OnNotifyFrameDecoded();
   }
 
   self->initialized_ = true;
