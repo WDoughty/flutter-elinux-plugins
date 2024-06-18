@@ -612,18 +612,17 @@ void GstVideoPlayer::OnCapsChanged(GstPad* pad, GParamSpec* pspec,
   gst_structure_get_int(structure, "width", &width);
   gst_structure_get_int(structure, "height", &height);
 
+  if (width == self->width_ && height == self->height_ && !self->initialized_) {
+    self->initialized_ = true;
+    return;
+  }
+
   if (width != self->width_ || height != self->height_) {
     self->width_ = width;
     self->height_ = height;
     std::cout << "Caps changed: width = " << width << ", height = " << height
               << std::endl;
     self->pixels_.reset(new uint32_t[self->width_ * self->height_]);
-  }
-
-  else if (width == self->width_ && height == self->height_ &&
-           !self->initialized_) {
-    self->initialized_ = true;
-    return;
   }
 
   self->initialized_ = true;
